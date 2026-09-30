@@ -1,0 +1,20 @@
+# Original 2020 stack (Colab ran torch 1.4.0 on Python 3.6).
+# Verified in 2026 on Python 3.8, Windows, CPU only: one epoch runs.
+# torch 1.4 predates Ampere GPUs, so on a recent NVIDIA card it can only use the CPU.
+#   py -3.8 -m venv .venv-2020
+#   .venv-2020\Scripts\python -m pip install -r requirements-2020.txt
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==1.4.0+cpu
+torchvision==0.5.0+cpu
+numpy==1.18.5
+Pillow==7.2.0
+matplotlib==3.3.4
+# to run the notebook headless (jupyter nbconvert --execute)
+nbconvert==6.5.4
+nbclient==0.5.13
+ipykernel==5.5.6
+jupyter-client==6.1.12
+traitlets==5.1.1
+Jinja2==3.0.3
+MarkupSafe==2.0.1
+lxml==5.1.1
