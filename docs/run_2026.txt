@@ -1,0 +1,10 @@
+2026 reproduction run
+
+Code:        cgan_lfw_attributes.ipynb, training cells exported to a script, EPOCHS = 300 (notebook default 2000)
+Hardware:    NVIDIA RTX A1000 6GB Laptop GPU
+Software:    Python 3.13.2, torch 2.14.0+cu126, torchvision 0.29.0+cu126 (see requirements.txt)
+Dataset:     13,233 LFWcrop files, 13,140 of them matched to a row in lfw_attributes.txt
+Started:     2026-10-01 08:01:05 (process start, includes about 1 min of dataset loading)
+Finished:    2026-10-01 09:40:57
+Epoch speed: 19.6 s per epoch (epoch 10 sample written 08:05:54, epoch 300 sample 09:40:41)
+Losses:      training_log_2026.txt (epoch, D loss, G loss; last batch of each epoch)

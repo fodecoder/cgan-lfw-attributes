@@ -1,0 +1,7 @@
+Mean absolute pixel difference (0-1 scale), 256 images, all other attributes 0
+different noise vector, same attributes	0.0758
+Male: -2 vs +2, same noise	0.0068
+Blond Hair: -2 vs +2, same noise	0.0004
+Eyeglasses: -2 vs +2, same noise	0.0006
+Smiling: -2 vs +2, same noise	0.0004
+all 36 attributes resampled, same noise	0.0029

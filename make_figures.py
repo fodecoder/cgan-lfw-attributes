@@ -2,9 +2,12 @@
 
 Reuses the notebook's own code for the generator, so there's no second copy
 of the model to drift. Needs output/generator.pth and the executed notebook
-(for the training log), e.g.:
+or its stdout log (for the loss curve), e.g.:
 
-    .venv\\Scripts\\python make_figures.py run_2026_out.ipynb
+    .venv\\Scripts\\python make_figures.py training_2026.log
+
+Writes to docs/: attribute_sweep.png, loss_curve.png, training_log_2026.txt
+and conditioning_check.txt.
 """
 import json
 import re
@@ -33,11 +36,14 @@ SWEEP = {"Male": 0, "Blond Hair": 10, "Eyeglasses": 14, "Smiling": 17}
 STEPS = np.linspace(-2, 2, 9)
 
 
-def attribute_sweep(device):
+def load_generator(device):
     generator = ns["Generator"]().to(device)
     generator.load_state_dict(torch.load("output/generator.pth", map_location=device))
     generator.eval()
+    return generator
 
+
+def attribute_sweep(generator, device):
     torch.manual_seed(0)
     noise = torch.randn(1, ns["LAT_DIM"], device=device).repeat(len(STEPS), 1)
     rows = []
@@ -63,12 +69,40 @@ def attribute_sweep(device):
     plt.close(fig)
 
 
-def loss_curve(executed_notebook):
-    log = ""
-    for cell in json.loads(Path(executed_notebook).read_text(encoding="utf-8"))["cells"]:
-        for out in cell.get("outputs", []):
-            log += "".join(out.get("text", ""))
-    rows = re.findall(r"\[Epoch: (\d+)/\d+\]\[D loss: ([\d.]+)\]\[G loss: ([\d.]+)\]", log)
+def conditioning_check(generator, device, n=256):
+    """How much do the attributes move the output, compared with the noise?
+
+    Mean absolute pixel difference on a 0-1 scale over n generated images.
+    """
+    def generate(noise, labels):
+        with torch.no_grad():
+            return (generator(noise, labels, len(noise)) + 1) / 2  # tanh output -> [0, 1]
+
+    torch.manual_seed(1)
+    noise = torch.randn(n, ns["LAT_DIM"], device=device)
+    other_noise = torch.randn(n, ns["LAT_DIM"], device=device)
+    zero = torch.zeros(n, ns["N_CLASSES"], device=device)
+    base = generate(noise, zero)
+
+    lines = [f"Mean absolute pixel difference (0-1 scale), {n} images, all other attributes 0",
+             f"different noise vector, same attributes\t{(generate(other_noise, zero) - base).abs().mean():.4f}"]
+    for name, index in SWEEP.items():
+        low, high = zero.clone(), zero.clone()
+        low[:, index], high[:, index] = -2, 2
+        lines.append(f"{name}: -2 vs +2, same noise\t{(generate(noise, high) - generate(noise, low)).abs().mean():.4f}")
+    resampled = torch.randn(n, ns["N_CLASSES"], device=device) * 2
+    lines.append(f"all {ns['N_CLASSES']} attributes resampled, same noise\t{(generate(noise, resampled) - base).abs().mean():.4f}")
+    (DOCS / "conditioning_check.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return lines
+
+
+def loss_curve(run_output):
+    """run_output: an executed copy of the notebook, or the plain stdout log of a run."""
+    text = Path(run_output).read_text(encoding="utf-8")
+    if run_output.endswith(".ipynb"):
+        text = "".join("".join(out.get("text", ""))
+                       for cell in json.loads(text)["cells"] for out in cell.get("outputs", []))
+    rows = re.findall(r"\[Epoch: (\d+)/\d+\]\[D loss: ([\d.]+)\]\[G loss: ([\d.]+)\]", text)
     epoch, d_loss, g_loss = (np.array(col, dtype=float) for col in zip(*rows))
     (DOCS / "training_log_2026.txt").write_text(
         "\n".join(f"{int(e)}\t{d}\t{g}" for e, d, g in zip(epoch, d_loss, g_loss)) + "\n",
@@ -95,5 +129,8 @@ def loss_curve(executed_notebook):
 
 if __name__ == "__main__":
     DOCS.mkdir(exist_ok=True)
-    attribute_sweep("cuda" if torch.cuda.is_available() else "cpu")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    generator = load_generator(device)
+    attribute_sweep(generator, device)
+    print("\n".join(conditioning_check(generator, device)))
     print("epochs in log:", loss_curve(sys.argv[1]))

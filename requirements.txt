@@ -1,0 +1,13 @@
+# Stack used for the 2026 reproduction run (300 epochs on an NVIDIA RTX A1000, CUDA 12.6 wheels).
+# The notebook runs unchanged on it. For the original 2020 stack see requirements-2020.txt.
+#   py -3.13 -m venv .venv
+#   .venv\Scripts\python -m pip install -r requirements.txt
+--extra-index-url https://download.pytorch.org/whl/cu126
+torch==2.14.0+cu126
+torchvision==0.29.0+cu126
+numpy==2.5.2
+pillow==12.3.0
+matplotlib==3.11.2
+# to run the notebook headless (jupyter nbconvert --execute)
+nbconvert==7.17.1
+ipykernel==7.4.0
