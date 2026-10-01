@@ -70,7 +70,7 @@ The original 2020 stack (torch 1.4.0) is pinned in `requirements-2020.txt`. It s
 
 ## Credits
 
-Built together with Antonio Epifani ([@Antonio210696](https://github.com/Antonio210696)) and Gianluca Amprimo. Antonio also prepared the LFWCrop dataset loader.
+Built together with Antonio Epifani ([@Antonio210696](https://github.com/Antonio210696)) and Gianluca Amprimo. The project ran alongside the course lectures, so all three of us worked on every part. Antonio also prepared the LFWCrop dataset loader.
 
 Data: [LFWcrop](https://conradsanderson.id.au/lfwcrop/), a cropped version of Labeled Faces in the Wild, and the [LFW attributes](http://www.cs.columbia.edu/CAVE/projects/faceverification) from Columbia University.
 
