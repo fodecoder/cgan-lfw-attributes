@@ -3,3 +3,5 @@ __pycache__/
 output/
 lfwcrop/
 *.pth
+.venv/
+.venv-2020/
